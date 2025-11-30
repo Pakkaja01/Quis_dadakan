@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kuis Data & Sistem Informasi</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 850px;
+        margin: 30px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+        text-align: center;
+        color: #0066cc;
+    }
+
+    .timer {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #ffeb3b;
+        border-radius: 10px;
+        color: #000;
+    }
+
+    .question {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f0f9ff;
+        border-left: 5px solid #00aaff;
+        border-radius: 10px;
+    }
+
+    button {
+        background: #0099ff;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size: 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 20px;
+    }
+
+    button:hover {
+        background: #007acc;
+    }
+
+    .result {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        background: #d4edda;
+        color: #155724;
+        margin-top: 20px;
+        border-radius: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>KUIS DADAKAN — Data & Sistem Informasi</h1>
+
+    <div class="timer" id="timer">Waktu: 2:00</div>
+
+    <form id="quizForm">
+
+        <!-- ============ SOAL-SOAL ============ -->
+        <div id="questions"></div>
+
+        <button type="button" onclick="submitQuiz()">Kirim Jawaban</button>
+
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+const questionsData = [
+    {q: "1. Apa itu data?", a: "A", options: ["Fakta mentah yang belum diolah", "Informasi yang sudah diproses", "Kesimpulan akhir", "Format file komputer"]},
+    {q: "2. Apa itu informasi?", a: "B", options: ["Data acak", "Data yang sudah diolah dan bermakna", "File spreadsheet", "Hasil perhitungan manual"]},
+    {q: "3. Contoh data adalah…", a: "D", options: ["Laporan penjualan", "Grafik pendapatan", "Ringkasan keuangan", "Angka 500, 300, 200"]},
+    {q: "4. Contoh informasi adalah…", a: "A", options: ["Laporan penjualan bulan Januari", "Angka acak 212, 88", "Nama file excel", "List folder"]},
+    {q: "5. Sistem informasi adalah…", a: "C", options: ["Komputer saja", "Aplikasi WhatsApp", "Gabungan manusia, teknologi, proses untuk mengolah data", "Formulir kertas"]},
+    {q: "6. Excel digunakan untuk…", a: "B", options: ["Mengetik surat", "Mengolah data angka", "Membuat presentasi", "Merekam audio"]},
+    {q: "7. Word digunakan untuk…", a: "D", options: ["Edit video", "Hitung otomatis", "Buat slide", "Mengetik dokumen"]},
+    {q: "8. PowerPoint digunakan untuk…", a: "A", options: ["Membuat presentasi", "Hitung data", "Mengelola database", "Membuat tabel"]},
+    {q: "9. Contoh sistem informasi di kampus…", a: "C", options: ["Google", "Instagram", "Sistem KRS/KHS", "Youtube"]},
+    {q: "10. Data → Informasi terjadi melalui…", a: "B", options: ["Penghapusan data", "Proses pengolahan", "Pemindahan folder", "Perhitungan manual"]},
+    {q: "11. Yang termasuk aplikasi perkantoran adalah…", a: "A", options: ["Word, Excel, PowerPoint", "VS Code", "Photoshop", "Chrome"]},
+    {q: "12. Output dari sistem informasi adalah…", a: "D", options: ["Harddisk", "Folder", "File acak", "Informasi yang bermanfaat"]},
+    {q: "13. Komponen utama sistem informasi adalah…", a: "B", options: ["Rumah, atap, pintu", "Manusia, hardware, software, data, prosedur", "Keyboard, mouse", "Folder, file"]},
+    {q: "14. Mengubah data menjadi grafik dilakukan di…", a: "A", options: ["Excel", "Word", "Paint", "Notepad"]},
+    {q: "15. Data yang baik harus…", a: "C", options: ["Sebanyak mungkin", "Berwarna", "Akurat dan relevan", "Diketik cepat"]},
+    {q: "16. Output PowerPoint biasanya berupa…", a: "D", options: ["Spreadsheet", "Dokumen teks", "Database", "Slide presentasi"]},
+    {q: "17. Yang bukan contoh data adalah…", a: "B", options: ["Jumlah mahasiswa", "Kesimpulan penelitian", "Daftar nilai", "Angka hasil survei"]},
+    {q: "18. Informasi berguna untuk…", a: "C", options: ["Menghapus data", "Menambah file", "Membantu pengambilan keputusan", "Mendownload video"]},
+    {q: "19. Excel dapat membuat…", a: "A", options: ["Tabel dan grafik", "Video animasi", "Website", "Audio"]},
+    {q: "20. Yang dimaksud database adalah…", a: "C", options: ["Aplikasi chat", "File kosong", "Kumpulan data yang terorganisir", "Folder musik"]}
+];
+
+function loadQuestions() {
+    let container = document.getElementById("questions");
+    let html = "";
+
+    questionsData.forEach((item, index) => {
+        html += `
+        <div class="question">
+            <p>${item.q}</p>
+            ${item.options.map((opt, i) => `
+                <label>
+                    <input type="radio" name="q${index}" value="${String.fromCharCode(65+i)}"> 
+                    ${String.fromCharCode(65+i)}. ${opt}
+                </label><br>
+            `).join("")}
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+loadQuestions();
+
+// ========== TIMER 2 MENIT ==========
+let timeLeft = 120;
+const timerElement = document.getElementById("timer");
+
+let timer = setInterval(() => {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    timerElement.textContent = `Waktu: ${minutes}:${seconds < 10 ? "0"+seconds : seconds}`;
+
+    if (timeLeft <= 0) {
+        clearInterval(timer);
+        submitQuiz();
+    }
+
+    timeLeft--;
+}, 1000);
+
+// ========== PENILAIAN JAWABAN ==========
+function submitQuiz() {
+    clearInterval(timer);
+
+    let score = 0;
+
+    questionsData.forEach((q, i) => {
+        let answer = document.querySelector(`input[name="q${i}"]:checked`);
+        if (answer && answer.value === q.a) score++;
+    });
+
+    document.getElementById("result").innerHTML = 
+        `<div class="result">Nilai Anda: <b>${score} / ${questionsData.length}</b></div>`;
+}
+</script>
+
+</body>
+</html>

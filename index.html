@@ -99,8 +99,9 @@
 </div>
 
 <script>
+
 // masukkan URL Web App kamu di sini
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbgk-13Bd2WPO_bW-7D7Y9GiXWNgQkqKuAgRt5bNfynLHO03zBTUy3Z8GN0bt3Gzop/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxW8UhFl396C_mjwAQrxryYLfncitVcxXRIjQvM64-P_I68SrVrRakqNwOg4yXf_Zs1/exec";
 
 const questionsData = [
     {q: "1. Apa itu data?", a: "A", options: ["Fakta mentah yang belum diolah", "Informasi yang sudah diproses", "Kesimpulan akhir", "Format file komputer"]},
@@ -166,13 +167,11 @@ let timer = setInterval(() => {
 }, 1000);
 
 
-// KIRIM JAWABAN + DISABLE INPUT
+// KIRIM JAWABAN PAKAI GET
 function submitQuiz() {
     clearInterval(timer);
 
-    // Disable semua input
-    document.querySelectorAll("input[type=radio]").forEach(el => el.disabled = true);
-    document.querySelector("button").disabled = true;
+    document.querySelectorAll("input, button").forEach(el => el.disabled = true);
 
     let score = 0;
     let answers = [];
@@ -184,23 +183,20 @@ function submitQuiz() {
         if (val === q.a) score++;
     });
 
-    // tampilkan nilai
-    document.getElementById("result").innerHTML = 
+    // Tampilkan nilai
+    document.getElementById("result").innerHTML =
         `<div class="result">Nilai Anda: <b>${score} / ${questionsData.length}</b></div>`;
 
-    // kirim ke Google Sheet
-    const data = {
+    // Buat parameter GET
+    const params = new URLSearchParams({
         nama: document.getElementById("nama").value,
         nim: document.getElementById("nim").value,
         score: score,
         answers: JSON.stringify(answers)
-    };
-
-    fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(data)
     });
+
+    // Kirim ke Google Sheets
+    fetch(`${SCRIPT_URL}?${params.toString()}`);
 }
 
 </script>

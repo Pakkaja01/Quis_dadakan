@@ -83,10 +83,15 @@
 
     <form id="quizForm">
 
-        <!-- ============ SOAL-SOAL ============ -->
+        <label>Nama:</label><br>
+        <input type="text" id="nama" required style="width:100%; padding:8px;"><br><br>
+
+        <label>NIM:</label><br>
+        <input type="text" id="nim" required style="width:100%; padding:8px;"><br><br>
+
         <div id="questions"></div>
 
-        <button type="button" id="submitBtn" onclick="submitQuiz()">Kirim Jawaban</button>
+        <button type="button" onclick="submitQuiz()">Kirim Jawaban</button>
 
     </form>
 
@@ -94,6 +99,9 @@
 </div>
 
 <script>
+// masukkan URL Web App kamu di sini
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbgk-13Bd2WPO_bW-7D7Y9GiXWNgQkqKuAgRt5bNfynLHO03zBTUy3Z8GN0bt3Gzop/exec";
+
 const questionsData = [
     {q: "1. Apa itu data?", a: "A", options: ["Fakta mentah yang belum diolah", "Informasi yang sudah diproses", "Kesimpulan akhir", "Format file komputer"]},
     {q: "2. Apa itu informasi?", a: "B", options: ["Data acak", "Data yang sudah diolah dan bermakna", "File spreadsheet", "Hasil perhitungan manual"]},
@@ -139,7 +147,7 @@ function loadQuestions() {
 
 loadQuestions();
 
-// ========== TIMER 2 MENIT ==========
+// TIMER 2 MENIT
 let timeLeft = 120;
 const timerElement = document.getElementById("timer");
 
@@ -157,29 +165,44 @@ let timer = setInterval(() => {
     timeLeft--;
 }, 1000);
 
-// ========== PENILAIAN + DISABLE FORM ==========
+
+// KIRIM JAWABAN + DISABLE INPUT
 function submitQuiz() {
     clearInterval(timer);
 
+    // Disable semua input
+    document.querySelectorAll("input[type=radio]").forEach(el => el.disabled = true);
+    document.querySelector("button").disabled = true;
+
     let score = 0;
+    let answers = [];
 
     questionsData.forEach((q, i) => {
         let answer = document.querySelector(`input[name="q${i}"]:checked`);
-        if (answer && answer.value === q.a) score++;
+        let val = answer ? answer.value : "-";
+        answers.push(val);
+        if (val === q.a) score++;
     });
 
-    // Disable semua input setelah submit
-    document.querySelectorAll("input[type=radio]").forEach(el => el.disabled = true);
-
-    // Disable tombol submit
-    let btn = document.getElementById("submitBtn");
-    btn.disabled = true;
-    btn.style.background = "#999";
-    btn.style.cursor = "not-allowed";
-
+    // tampilkan nilai
     document.getElementById("result").innerHTML = 
         `<div class="result">Nilai Anda: <b>${score} / ${questionsData.length}</b></div>`;
+
+    // kirim ke Google Sheet
+    const data = {
+        nama: document.getElementById("nama").value,
+        nim: document.getElementById("nim").value,
+        score: score,
+        answers: JSON.stringify(answers)
+    };
+
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(data)
+    });
 }
+
 </script>
 
 </body>
